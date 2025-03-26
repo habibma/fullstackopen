@@ -3,9 +3,12 @@ import { useState } from 'react'
 const Button = ({onClick, text}) => <button onClick={onClick}>{text}</button>
 
 const Statistics = (props) => {
-  return (
-    <div>
-      <h2>statistics</h2>
+  if (props.all === 0){
+    return <p>No feedback given</p>
+  }
+  else {
+    return (
+      <div>
       <p>good {props.good}</p>
       <p>neutral {props.neutral}</p>
       <p>bad {props.bad}</p>
@@ -13,7 +16,8 @@ const Statistics = (props) => {
       <p>average {props.average}</p>
       <p>positive {props.positive} %</p>
     </div>
-  )
+    )
+  }
 }
 
 const App = () => {
@@ -54,6 +58,7 @@ const App = () => {
       <Button onClick={() => handleFeedback('good')} text='good' />
       <Button onClick={() => handleFeedback('neutral')} text='neutral' />
       <Button onClick={() => handleFeedback('bad')} text='bad' />
+      <h2>statistics</h2>
       <Statistics good={good} neutral={neutral} bad={bad} all={all} average={average} positive={positive} />
     </>
   )
