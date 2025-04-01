@@ -52,7 +52,16 @@ const App = () => {
     event.preventDefault();
     const personExists = persons.some(person => person.name === newName)
     if (personExists) {
-      alert(`${newName} is already added to phonebook`)
+      const confirm = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
+      if (confirm) {
+       const person = persons.find(person => person.name === newName)
+       const updatedPerson = {...person, number: newNumber}
+       personsService
+       .update(person.id, updatedPerson)
+        .then(returnedPerson => {
+          setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
+       })
+      }
       return ;
     }
     personsService
@@ -79,7 +88,7 @@ const App = () => {
     }
   }
 
-  const filteredPersons = persons.filter(person => person.name.toLowerCase().includes(newFilter.toLocaleLowerCase()))
+  const filteredPersons = persons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
 
   return (
     <div>
