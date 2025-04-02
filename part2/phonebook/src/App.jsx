@@ -23,11 +23,11 @@ const PersonForm = ({ newName, newNumber, handlePersonChange, handleNumberChange
 }
 
 const Notification = ({ notif }) => {
-  if (!notif)
+  if (!notif.type)
     return null;
   return (
-    <div className='notif'>
-      {notif}
+    <div className={notif.type === 'sucess' ? 'notif' : 'error'}>
+      {notif.message}
     </div>
   )
 }
@@ -37,7 +37,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
-  const [notif, setNotif] = useState()
+  const [notif, setNotif] = useState({})
 
   useEffect(() => {
     personsService
@@ -45,7 +45,7 @@ const App = () => {
       .then(initialPersons => {
         setPersons(initialPersons)
       })
-  }, [persons])
+  }, [])
 
   const handlePersonChange = (event) => {
     setNewName(event.target.value)
@@ -71,19 +71,19 @@ const App = () => {
        .update(person.id, updatedPerson)
         .then(returnedPerson => {
           setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
-          setNotif(`${person.name} updated!`)
+          setNotif({type: 'sucess', message: `${person.name} updated!`})
           setTimeout(() => {
-            setNotif(null)
+            setNotif({})
           }, 3000)
        })
        .catch(error => {
         setNotif(
-          `Person '${person.name}' was already removed from server`
+          {type: 'error', message: `Person '${person.name}' was already removed from server`}
         )
         setTimeout(() => {
-          setNotif(null)
+          setNotif({})
         }, 3000)
-        setPersons(persons.filter(n => n.id !== id))
+        setPersons(persons.filter(p => p.id !== person.id))
       })
       }
       return ;
@@ -92,9 +92,9 @@ const App = () => {
     .create({name: newName , number: newNumber})
     .then(returnedPerson => {
       persons.concat(returnedPerson)
-      setNotif(`${returnedPerson.name} Added!`)
+      setNotif({ type: 'sucess' , message: `${returnedPerson.name} Added!`})
       setTimeout(() => {
-        setNotif(null)
+        setNotif({})
       }, 3000)
     })
     setNewName('')
@@ -109,13 +109,13 @@ const App = () => {
         .remove(id)
         .then ((res) => {
           setPersons(persons.filter(person => person.id !== res.id))
-          setNotif(`${res.name} deleted!`)
+          setNotif({type: 'sucess', message: `${res.name} deleted!`})
           setTimeout(()=>{
-            setNotif(null)
+            setNotif({})
           }, 3000)
         })
         .catch(() => {
-          setNotif(`${person} is already deleted from server!`)
+          setNotif({type: 'error', message: `${person} is already deleted from server!`})
         })
     }
   }
