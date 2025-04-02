@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import personsService from './services/persons'
-import axios from 'axios'
+import './index.css'
 
 const Filter = ({ filter, handleFilterChange }) => {
   return <p>filter shown with <input value={filter} onChange={handleFilterChange} /></p>
@@ -22,11 +22,22 @@ const PersonForm = ({ newName, newNumber, handlePersonChange, handleNumberChange
  )
 }
 
+const Notification = ({ notif }) => {
+  if (!notif)
+    return null;
+  return (
+    <div className='notif'>
+      {notif}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [notif, setNotif] = useState()
 
   useEffect(() => {
     personsService
@@ -34,7 +45,7 @@ const App = () => {
       .then(initialPersons => {
         setPersons(initialPersons)
       })
-  }, [])
+  }, [persons])
 
   const handlePersonChange = (event) => {
     setNewName(event.target.value)
@@ -60,7 +71,20 @@ const App = () => {
        .update(person.id, updatedPerson)
         .then(returnedPerson => {
           setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
+          setNotif(`${person.name} updated!`)
+          setTimeout(() => {
+            setNotif(null)
+          }, 3000)
        })
+       .catch(error => {
+        setNotif(
+          `Person '${person.name}' was already removed from server`
+        )
+        setTimeout(() => {
+          setNotif(null)
+        }, 3000)
+        setPersons(persons.filter(n => n.id !== id))
+      })
       }
       return ;
     }
@@ -68,6 +92,10 @@ const App = () => {
     .create({name: newName , number: newNumber})
     .then(returnedPerson => {
       persons.concat(returnedPerson)
+      setNotif(`${returnedPerson.name} Added!`)
+      setTimeout(() => {
+        setNotif(null)
+      }, 3000)
     })
     setNewName('')
     setNewNumber('')
@@ -81,9 +109,13 @@ const App = () => {
         .remove(id)
         .then ((res) => {
           setPersons(persons.filter(person => person.id !== res.id))
+          setNotif(`${res.name} deleted!`)
+          setTimeout(()=>{
+            setNotif(null)
+          }, 3000)
         })
         .catch(() => {
-          alert(`${person} is already deleted from server!`)
+          setNotif(`${person} is already deleted from server!`)
         })
     }
   }
@@ -93,6 +125,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notif={notif} />
       <Filter filter={newFilter} handleFilterChange={handleFilterChange} />
       <h2>Add a new</h2>
       <PersonForm newName={newName} newNumber={newNumber} handlePersonChange={handlePersonChange} handleNumberChange={handleNumberChange} AddToPersons={AddToPersons} />
