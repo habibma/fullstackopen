@@ -7,4 +7,9 @@ const getAll = () => {
     return req.then(res => res.data)
 }
 
-export default {getAll}
+const get = (name) => {
+    const req = axios.get(`${baseUrl}/name/${name}`)
+    return req.then(res => res.data)
+}
+
+export default {getAll, get}
