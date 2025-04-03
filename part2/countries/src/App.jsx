@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react'
 import countriesService from './services/countries'
 
 const Result = ({countries}) => {
-  const result = countries.map( country => <li>{country.name.common}</li>)
+  const result = countries.map( country => <li key={country.name.common}>{country.name.common}</li>)
 
   if (result.length > 10)
     return<div>Too many matches, specify another filter</div>
   if (result.length === 1){
-    console.log(countries[0].languages);
     const country = countries[0]
     return (
       <div>
@@ -16,7 +15,7 @@ const Result = ({countries}) => {
         <p>Area {country.area}</p>
         <h2>Languages</h2>
         <ul>
-          { Object.values(country.languages).map(value => <li>{value}</li>) }
+          { Object.values(country.languages).map(value => <li key={value}>{value}</li>) }
         </ul>
         <img src={country.flags.png} alt={country.flags.alt} />
       </div>
