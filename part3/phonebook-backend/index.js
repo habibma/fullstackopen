@@ -1,14 +1,16 @@
 const express = require('express');
+const morgan = require('morgan');
 
 const app = express();
 
 app.use(express.json())
+app.use(morgan('tiny'))
 
 let persons = [
     { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
+        "id": "1",
+        "name": "Arto Hellas", 
+        "number": "040-123456"
     },
     { 
       "id": "2",
@@ -59,13 +61,13 @@ const generateId = () => {
 
 app.post('/api/persons', (req, res) => {
     const body = req.body;
-
+    
     if (!body.name || !body.number)
         return res.status(400).json({error: "name or number is missing"})
-
+    
     if (persons.map(p => p.name).includes(body.name))
         return res.status(409).json({error: "name must be unique"})
-
+    
     const newPerson = {
         id: generateId(),
         name: body.name,
