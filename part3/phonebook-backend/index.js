@@ -2,9 +2,10 @@ const express = require('express');
 const morgan = require('morgan');
 
 const app = express();
+morgan.token('data', function (req, res) { return JSON.stringify(req.body) })
 
 app.use(express.json())
-app.use(morgan('tiny'))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 let persons = [
     { 
@@ -28,6 +29,11 @@ let persons = [
       "number": "39-23-6423122"
     }
 ]
+
+const generateId = () => {
+    const id = Math.floor(Math.random() * 1000);
+    return String(id);
+}
 
 app.get('/info', (req, res) => {
     const reqDate = Date();
@@ -54,27 +60,22 @@ app.delete('/api/persons/:id', (req, res) => {
     res.status(204).end()
 })
 
-const generateId = () => {
-    const id = Math.floor(Math.random() * 1000);
-    return String(id);
-}
-
 app.post('/api/persons', (req, res) => {
     const body = req.body;
-    
+
     if (!body.name || !body.number)
         return res.status(400).json({error: "name or number is missing"})
-    
+
     if (persons.map(p => p.name).includes(body.name))
         return res.status(409).json({error: "name must be unique"})
-    
+
     const newPerson = {
         id: generateId(),
         name: body.name,
         number: body.number,
     }
     persons.push(newPerson);
-    res.status(201).end()
+    res.status(201).json(newPerson)
 })
 
 const PORT = 3001;
