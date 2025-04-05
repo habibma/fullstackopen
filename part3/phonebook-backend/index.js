@@ -60,13 +60,16 @@ const generateId = () => {
 app.post('/api/persons', (req, res) => {
     const body = req.body;
 
-    if (!body.name)
-        res.status(400).json({error: "name is missing"})
+    if (!body.name || !body.number)
+        return res.status(400).json({error: "name or number is missing"})
+
+    if (persons.map(p => p.name).includes(body.name))
+        return res.status(409).json({error: "name must be unique"})
 
     const newPerson = {
         id: generateId(),
         name: body.name,
-        number: body.number || '',
+        number: body.number,
     }
     persons.push(newPerson);
     res.status(201).end()
