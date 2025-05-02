@@ -9,32 +9,9 @@ const Person = require('./models/person')
 morgan.token('data', function (req, res) { return JSON.stringify(req.body) })
 
 // --- Middleware ---
+app.use(express.static('dist'))
 app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
-app.use(express.static('dist'))
-
-/* let persons = [
-    { 
-        "id": "1",
-        "name": "Arto Hellas", 
-        "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-] */
 
 const generateId = () => {
     const id = Math.floor(Math.random() * 1000);
@@ -42,12 +19,12 @@ const generateId = () => {
 }
 
 // --- Route Handlers ---
-
 app.get('/info', (req, res) => {
     const reqDate = Date();
     res.send(`<p>Phonebook has info for ${Person.find({}).length} people</p><p>${reqDate}</p>`)
 })
 
+// to get all data
 app.get('/api/persons', (req, res) => {
     Person.find({})
         .then(persons => {
@@ -55,6 +32,7 @@ app.get('/api/persons', (req, res) => {
         })
 })
 
+// to get a single data
 app.get('/api/persons/:id', (req, res) => {
     const id = req.params.id;
     Person.findById(id)
@@ -64,15 +42,23 @@ app.get('/api/persons/:id', (req, res) => {
             else
                 res.status(404).send({ error: 'Person not found'});
         })
+        .catch(error => {
+            console.log(error)
+            res.status(400).send({ error: 'malformatted id' })
+          })
 })
 
-/* app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
     const id = req.params.id;
-    persons = persons.filter(p => p.id !== id)
+    Person.findByIdAndDelete(id)
+        .then(result => {
+            res.status(204).end()
+        })
+        .catch(err => next(err))
+})
 
-    res.status(204).end()
-})*/
 
+// to create a data
 app.post('/api/persons', (req, res) => {
     const body = req.body;
 
