@@ -76,6 +76,27 @@ app.post('/api/persons', (req, res, next) => {
         .catch(err => next(err))
 })
 
+// to update an existing person
+app.put('/api/persons/:id', (req, res, next) => {
+
+    const { number } = req.body;
+    if (!number)
+        return response.status(400).json({ error: 'number missing' });
+
+    const id = req.params.id;
+    const updateData = {
+        number: number,
+    };
+    options = { new: true, runValidators: true, context: 'query' }
+    Person.findByIdAndUpdate(id, updateData, options)
+        .then(updatedPerson => {
+            if (!updatedPerson)
+                return response.status(404).end()
+            res.json(updatedPerson);
+        })
+        .catch(err => next(err));
+})
+
 const errorHandler = (error, request, response, next) => {
     console.error("Error caught by errorHandler:", error.message);
 
