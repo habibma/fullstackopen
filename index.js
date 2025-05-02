@@ -19,9 +19,13 @@ const generateId = () => {
 }
 
 // --- Route Handlers ---
-app.get('/info', (req, res) => {
-    const reqDate = Date();
-    res.send(`<p>Phonebook has info for ${Person.find({}).length} people</p><p>${reqDate}</p>`)
+app.get('/info', (req, res, next) => {
+    Person.countDocuments({})
+        .then(count => {
+            const reqDate = Date();
+            res.send(`<p>Phonebook has info for ${count} people</p><p>${reqDate}</p>`)
+        })
+        .catch(err => next(err));
 })
 
 // to get all data
