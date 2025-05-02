@@ -25,15 +25,16 @@ app.get('/info', (req, res) => {
 })
 
 // to get all data
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Person.find({})
         .then(persons => {
             res.json(persons);
         })
+        .catch(err => next(err))
 })
 
 // to get a single data
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     const id = req.params.id;
     Person.findById(id)
         .then(person => {
@@ -43,8 +44,7 @@ app.get('/api/persons/:id', (req, res) => {
                 res.status(404).send({ error: 'Person not found'});
         })
         .catch(error => {
-            console.log(error)
-            res.status(400).send({ error: 'malformatted id' })
+            next(error);
           })
 })
 
@@ -57,16 +57,12 @@ app.delete('/api/persons/:id', (req, res, next) => {
         .catch(err => next(err))
 })
 
-
 // to create a data
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const body = req.body;
 
     if (!body.name || !body.number)
         return res.status(400).json({error: "name or number is missing"})
-
-    // if (persons.map(p => p.name).includes(body.name))
-    //     return res.status(409).json({error: "name must be unique"})
 
     const newPerson = new Person({
         id: generateId(),
@@ -76,8 +72,28 @@ app.post('/api/persons', (req, res) => {
     newPerson.save()
         .then(savedPerson => {
             res.status(201).json(savedPerson);
-        });
+        })
+        .catch(err => next(err))
 })
+
+const errorHandler = (error, request, response, next) => {
+    console.error("Error caught by errorHandler:", error.message);
+
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' });
+    } else if (error.name === 'ValidationError') {
+      return response.status(400).json({ error: error.message });
+    }
+    next(error);
+}
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
