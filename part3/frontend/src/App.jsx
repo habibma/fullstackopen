@@ -68,14 +68,14 @@ const App = () => {
        const person = persons.find(person => person.name === newName)
        const updatedPerson = {...person, number: newNumber}
        personsService
-       .update(person.id, updatedPerson)
-        .then(returnedPerson => {
-          setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
-          setNotif({type: 'sucess', message: `${person.name} updated!`})
-          setTimeout(() => {
-            setNotif({})
-          }, 3000)
-       })
+        .update(person.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
+            setNotif({type: 'sucess', message: `${person.name} updated!`})
+            setTimeout(() => {
+              setNotif({})
+            }, 3000)
+        })
        .catch(error => {
         setNotif(
           {type: 'error', message: `Person '${person.name}' was already removed from server`}
@@ -89,14 +89,20 @@ const App = () => {
       return ;
     }
     personsService
-    .create({name: newName , number: newNumber})
-    .then(returnedPerson => {
-      persons.concat(returnedPerson)
-      setNotif({ type: 'sucess' , message: `${returnedPerson.name} Added!`})
-      setTimeout(() => {
-        setNotif({})
-      }, 3000)
-    })
+      .create({name: newName , number: newNumber})
+      .then(returnedPerson => {
+        persons.concat(returnedPerson)
+        setNotif({ type: 'sucess' , message: `${returnedPerson.name} Added!`})
+        setTimeout(() => {
+          setNotif({})
+        }, 3000)
+      })
+      .catch(err => {
+        console.log(err.response.data.error);
+        setNotif(
+          {type: 'error', message: err.response.data.error}
+        )
+      })
     setNewName('')
     setNewNumber('')
   }
@@ -109,7 +115,7 @@ const App = () => {
         .remove(id)
         .then ((res) => {
           setPersons(persons.filter(person => person.id !== res.id))
-          setNotif({type: 'sucess', message: `${res.name} deleted!`})
+          setNotif({type: 'sucess', message: `${person} deleted!`})
           setTimeout(()=>{
             setNotif({})
           }, 3000)
